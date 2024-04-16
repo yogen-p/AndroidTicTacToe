@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.hilt.android.plugin)
+    kotlin("kapt")
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -56,6 +59,19 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.kotlin.serialization)
+    implementation(libs.androidx.compose.viewmodel)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.websockets)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,4 +79,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }
