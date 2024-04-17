@@ -6,7 +6,6 @@ import com.mryogip.tictactoe.data.GameState
 import com.mryogip.tictactoe.data.MakeTurn
 import com.mryogip.tictactoe.data.SocketClient
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.net.ConnectException
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,14 +25,14 @@ class TicTacToeViewModel @Inject constructor(
         .getGameStateStream()
         .onStart { _isConnecting.value = true }
         .onEach { _isConnecting.value = false }
-        .catch { t -> _showConnectionError.value = t is ConnectException }
+        .catch { t -> _errorMessage.value = t.message }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GameState())
 
     private val _isConnecting = MutableStateFlow(false)
     val isConnecting = _isConnecting.asStateFlow()
 
-    private val _showConnectionError = MutableStateFlow(false)
-    val showConnectionError = _showConnectionError.asStateFlow()
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage = _errorMessage.asStateFlow()
 
     fun finishTurn(x: Int, y: Int) {
         if (state.value.field[y][x] != null || state.value.winningPlayer != null) {
@@ -42,6 +41,12 @@ class TicTacToeViewModel @Inject constructor(
 
         viewModelScope.launch {
             client.sendAction(MakeTurn(x, y))
+        }
+    }
+
+    fun restartGame() {
+        viewModelScope.launch {
+            client.sendAction(MakeTurn(-1, -1))
         }
     }
 

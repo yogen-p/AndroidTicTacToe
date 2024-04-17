@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,25 +36,22 @@ class MainActivity : ComponentActivity() {
                 val viewModel = hiltViewModel<TicTacToeViewModel>()
                 val state by viewModel.state.collectAsState()
                 val isConnecting by viewModel.isConnecting.collectAsState()
-                val showConnectionError by viewModel.showConnectionError.collectAsState()
-
-                if (showConnectionError) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "",
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                    return@TicTacToeTheme
-                }
+                val errorMessage by viewModel.errorMessage.collectAsState()
 
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
+
+                    errorMessage?.let {
+                        Text(
+                            text = it,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        return@TicTacToeTheme
+                    }
+
                     Column(
                         modifier = Modifier
                             .padding(vertical = 32.dp)
@@ -62,11 +60,13 @@ class MainActivity : ComponentActivity() {
                         if (!state.connectedPlayers.contains('X')) {
                             Text(
                                 fontSize = 32.sp,
+                                color = Color.Black,
                                 text = "Waiting for Player: X"
                             )
                         } else if (!state.connectedPlayers.contains('O')) {
                             Text(
                                 fontSize = 32.sp,
+                                color = Color.Black,
                                 text = "Waiting for Player: O"
                             )
                         }
@@ -117,6 +117,21 @@ class MainActivity : ComponentActivity() {
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator()
+                        }
+                    }
+
+                    if (!state.isBoardFull) {
+                        Button(
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            onClick = {
+                                viewModel.restartGame()
+                            }
+                        ) {
+                            Text(
+                                text = "Restart",
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
                         }
                     }
                 }
